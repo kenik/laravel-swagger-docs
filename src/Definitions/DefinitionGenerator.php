@@ -26,10 +26,16 @@ class DefinitionGenerator
     protected array $models = [];
 
     /**
+     * String with path to swagger files
+     */
+    protected string $overridePath = '';
+
+    /**
      * DefinitionGenerator constructor.
      */
-    public function __construct(array $ignoredModels = [])
+    public function __construct(array $ignoredModels = [], string $overridePath = '')
     {
+        $this->overridePath = $overridePath;
         $this->models = collect(File::allFiles(app_path()))
             ->map(function ($item) {
                 /**
@@ -202,6 +208,20 @@ class DefinitionGenerator
                 }
 
                 $schemas[$this->getModelName($obj)] = $definition;
+            }
+        }
+
+        File::isDirectory($this->overridePath) or File::makeDirectory($this->overridePath, 0777, true, true);
+        $schemasFile = implode(DIRECTORY_SEPARATOR, [$this->overridePath, 'override.json']);
+
+        if (file_exists($schemasFile)) {
+            $json = file_get_contents($schemasFile);
+            $data = json_decode($json, true);
+
+            if ($data !== null && $data['schemas'] && count($data['schemas']) > 0) {
+                foreach ($data['schemas'] as $name => $schema) {
+                    $schemas[$name] = $schema;
+                }
             }
         }
 
