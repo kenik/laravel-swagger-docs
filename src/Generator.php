@@ -97,7 +97,7 @@ class Generator {
         $documentation = $this->generateBaseInformation();
         $applicationRoutes = $this->getApplicationRoutes();
 
-        $this->definitionGenerator = new DefinitionGenerator(Arr::get($this->ignored, 'models'));
+        $this->definitionGenerator = new DefinitionGenerator(Arr::get($this->ignored, 'models'), $this->configuration->get('swagger.storage'));
         Arr::set($documentation, 'components.schemas', $this->definitionGenerator->generateSchemas());
 
         if ($this->fromConfig('parse.security', false) /*&& $this->hasOAuthRoutes($applicationRoutes)*/) {
